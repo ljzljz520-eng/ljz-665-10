@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>演播室综合管理平台 · 器材档案</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- ============ 登录页 ============ -->
+<div id="loginView" class="login-wrap hidden">
+  <div class="login-card">
+    <div class="login-logo">🎬</div>
+    <h1>演播室综合管理平台</h1>
+    <p class="login-sub">器材档案管理系统</p>
+    <form id="loginForm">
+      <label>用户名<input id="loginUser" autocomplete="username" placeholder="请输入用户名" required></label>
+      <label>密码<input id="loginPass" type="password" autocomplete="current-password" placeholder="请输入密码" required></label>
+      <button type="submit" class="btn btn-primary btn-block">登 录</button>
+      <div id="loginError" class="login-error"></div>
+    </form>
+    <div class="demo-accounts">
+      <div class="demo-title">演示账号（点击填充，密码与用户名同名+123）</div>
+      <div class="demo-item" data-u="admin" data-p="admin123"><b>admin</b><span>系统管理员 · 全部权限</span></div>
+      <div class="demo-item" data-u="keeper" data-p="keeper123"><b>keeper</b><span>器材管理员 · 增改/附件，不可删除</span></div>
+      <div class="demo-item" data-u="viewer" data-p="viewer123"><b>viewer</b><span>普通员工 · 仅查看</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 平台主框架 ============ -->
+<div id="appView" class="app hidden">
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">🎬 演播室综合管理平台</div>
+    <div class="topbar-right">
+      <span id="userBadge" class="user-badge"></span>
+      <button id="logoutBtn" class="btn btn-ghost">退出登录</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- 平台菜单 -->
+    <aside class="sidebar">
+      <div class="menu-title">平台菜单</div>
+      <nav id="menu">
+        <a class="menu-item" data-page="home"><span class="mi">🏠</span>系统首页</a>
+        <a class="menu-item active" data-page="archive"><span class="mi">🗄️</span>演播室器材档案</a>
+        <a class="menu-item" data-page="borrow"><span class="mi">📋</span>借用记录</a>
+        <a class="menu-item" data-page="about"><span class="mi">🔐</span>角色权限说明</a>
+      </nav>
+    </aside>
+
+    <!-- 内容区 -->
+    <main class="content">
+      <!-- 首页占位 -->
+      <section id="page-home" class="page hidden">
+        <h2>系统首页</h2>
+        <div id="homeCards" class="stat-cards"></div>
+        <p class="muted">请从左侧菜单进入「演播室器材档案」进行器材管理。</p>
+      </section>
+
+      <!-- 器材档案 -->
+      <section id="page-archive" class="page">
+        <div class="page-head">
+          <div>
+            <h2>演播室器材档案</h2>
+            <p class="muted" id="roleHint"></p>
+          </div>
+          <button id="addBtn" class="btn btn-primary">＋ 新增器材</button>
+        </div>
+
+        <div class="toolbar">
+          <div id="catTabs" class="tabs"></div>
+          <select id="statusFilter" class="input">
+            <option value="">全部状态</option>
+          </select>
+          <input id="searchInput" class="input search" placeholder="搜索编号 / 名称 / 位置 / 责任人…">
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>器材编号</th><th>名称</th><th>分类</th><th>存放位置</th>
+                <th>借用状态</th><th>责任人</th><th>附件</th><th class="col-actions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="equipTbody"></tbody>
+          </table>
+          <div id="emptyTip" class="empty hidden">暂无符合条件的器材档案</div>
+        </div>
+      </section>
+
+      <!-- 借用记录占位 -->
+      <section id="page-borrow" class="page hidden">
+        <h2>借用记录</h2>
+        <p class="muted">该模块规划中。当前可在「演播室器材档案」中通过“借用状态”字段（在库 / 借出 / 维修）跟踪器材去向。</p>
+      </section>
+
+      <!-- 权限说明 -->
+      <section id="page-about" class="page hidden">
+        <h2>角色权限说明</h2>
+        <table class="perm-table">
+          <thead><tr><th>角色</th><th>查看档案</th><th>新增</th><th>编辑</th><th>删除</th><th>附件上传/删除</th><th>附件下载</th></tr></thead>
+          <tbody>
+            <tr><td><b>系统管理员</b>（admin）</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td><b>器材管理员</b>（keeper）</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td><b>普通员工</b>（viewer）</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">权限同时在前端（按钮显隐）与后端（接口鉴权，返回 403）双重校验。</p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 新增/编辑弹窗 ============ -->
+<div id="formModal" class="modal-mask hidden">
+  <div class="modal">
+    <div class="modal-head"><h3 id="formTitle">新增器材</h3><button class="modal-x" data-close>✕</button></div>
+    <form id="equipForm" class="modal-body">
+      <input type="hidden" id="fId">
+      <div class="form-grid">
+        <label>器材编号 *<input id="fCode" class="input" placeholder="如 CAM-004" required></label>
+        <label>器材名称 *<input id="fName" class="input" placeholder="如 索尼 FX6" required></label>
+        <label>器材分类 *<select id="fCategory" class="input" required></select></label>
+        <label>借用状态 *<select id="fStatus" class="input" required></select></label>
+        <label>存放位置 *<input id="fLocation" class="input" placeholder="如 演播室A-1号器材柜" required></label>
+        <label>责任人 *<input id="fOwner" class="input" placeholder="如 张伟" required></label>
+      </div>
+      <label>备注<textarea id="fNote" class="input" rows="2" placeholder="配件、借出去向、维修情况等（选填）"></textarea></label>
+      <div class="modal-foot">
+        <button type="button" class="btn" data-close>取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ 详情/附件弹窗 ============ -->
+<div id="detailModal" class="modal-mask hidden">
+  <div class="modal">
+    <div class="modal-head"><h3>器材详情与附件</h3><button class="modal-x" data-close>✕</button></div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<input type="file" id="fileInput" class="hidden">
+
+<script src="/app.js"></script>
+</body>
+</html>
