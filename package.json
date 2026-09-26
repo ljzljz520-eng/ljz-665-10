@@ -1,0 +1,16 @@
+{
+  "name": "studio-gear-archive",
+  "version": "1.0.0",
+  "description": "演播室器材档案管理平台：摄像机 / 灯光 / 收音 / 切换台的后台档案管理，含角色权限（查看/编辑分离）与增删改查",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "seed": "node server/seed.js",
+    "demo": "bash scripts/demo.sh"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
